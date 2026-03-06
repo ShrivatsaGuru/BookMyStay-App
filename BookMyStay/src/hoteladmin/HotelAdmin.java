@@ -1,5 +1,5 @@
 package hoteladmin;
-import inventoy.InventoryService;
+import inventory.InventoryService;
 
 public class HotelAdmin 
 {

@@ -1,15 +1,15 @@
 package main;
 import java.util.*;
 
-import hoteladmin.HotelAdmin;
-import inventoy.InventoryService;
+import hoteladmin.*;
+import inventory.InventoryService;
 public class Main {
 
 	public static void main(String[] args) 
 	{
 		Scanner sc=new Scanner(System.in);
 		HotelAdmin admin=new HotelAdmin();
-
+		Guest guest=new Guest();
 		while(true)
 		{
 			System.out.print("Which room do you want to add:\n-Single\n-Double\n-Suite\n");
@@ -32,6 +32,7 @@ public class Main {
 		System.out.println("Enter room type to check availability: ");
 		String choice=sc.nextLine();
 		System.out.println("Availability Status :"+InventoryService.isAvailable(choice));
+		guest.roomCheck();		
 	}
 
 }
