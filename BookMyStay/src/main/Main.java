@@ -12,7 +12,7 @@ public class Main {
         boolean exit = false;
 
         while (!exit) {
-            System.out.println("Select which operation to perform :\n-1) Add Room\n-2) Get Room Count\n-3) Get Room Price\n-4) Check Rooms\n-5) Add Guest\n-6) Process Booking Request\n-7) Add Service to Booking\n-8) View Service Bill\n-9) Exit");
+            System.out.println("Select which operation to perform :\n-1) Add Room\n-2) Get Room Count\n-3) Get Room Price\n-4) Check Rooms\n-5) Add Guest\n-6) Process Booking Request\n-7) Add Service to Booking\n-8) View Service Bill\n-9) View Booking History\n-10) Cancel Booking\n-11) Exit");
             int operation = sc.nextInt();
             sc.nextLine();
 
@@ -80,6 +80,16 @@ public class Main {
                     admin.printServiceBill(billRoomId);
                     break;
                 case 9:
+                    // UC6: Print all confirmed bookings as an operational report
+                    admin.viewBookingHistory();
+                    break;
+                case 10:
+                    // UC6: Cancel a booking by room ID and restore the room to inventory
+                    System.out.print("Enter room ID to cancel (e.g., Single-1): ");
+                    String cancelRoomId = sc.nextLine();
+                    admin.cancelBooking(cancelRoomId);
+                    break;
+                case 11:
                     System.out.println("Exiting...");
                     exit = true;
                     break;

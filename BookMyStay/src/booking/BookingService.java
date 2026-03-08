@@ -75,6 +75,11 @@ public class BookingService {
             }
             // UC4: Assign a unique room ID and mark it as booked (prevents reuse)
             String roomId = InventoryService.assignRoom(roomType);
+            reservation.setRoomId(roomId); // Store the assigned room ID on the reservation
+
+            // UC6: Save the confirmed reservation to booking history
+            BookingHistory.addBooking(reservation);
+
             System.out.println("Booking confirmed for: " + guest.getName() + " | Assigned Room: " + roomId);
         } else {
             System.out.println("No " + roomType + " rooms available. Booking request for " + guest.getName() + " cannot be processed.");

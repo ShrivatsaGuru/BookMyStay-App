@@ -1,5 +1,6 @@
 package hoteladmin;
 
+import booking.BookingHistory;
 import booking.BookingService;
 import inventory.InventoryService;
 import services.Service;
@@ -118,5 +119,22 @@ public class HotelAdmin {
      */
     public static void printServiceBill(String roomId) {
         ServiceManager.printServiceBill(roomId);
+    }
+
+    /**
+     * Prints all confirmed reservations as an operational report (UC6).
+     */
+    public static void viewBookingHistory() {
+        BookingHistory.viewHistory();
+    }
+
+    /**
+     * Cancels a confirmed booking by its room ID (UC6).
+     * The room is returned to inventory and can be booked again.
+     *
+     * @param roomId the room ID to cancel (e.g., "Single-1")
+     */
+    public static void cancelBooking(String roomId) {
+        BookingHistory.cancelBooking(roomId);
     }
 }

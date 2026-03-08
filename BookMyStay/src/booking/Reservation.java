@@ -3,43 +3,28 @@ package booking;
 import hoteladmin.Guest;
 
 /**
- * Represents a hotel room booking request made by a guest.
- * <p>
- * Encapsulates the guest and their desired room type into a single unit
- * so that booking requests can be stored together in a queue (UC3).
- * </p>
+ * Represents a hotel booking — first as a pending request (UC3),
+ * then as a confirmed reservation once a room ID is assigned (UC4).
+ *
+ * roomId is null while the booking is still in the queue,
+ * and is set to the assigned room ID (e.g., "Single-1") on confirmation.
  */
 public class Reservation {
 
-    private final Guest guest;
-    private final String roomType;
+    private final Guest guest;    // The guest who made this booking
+    private final String roomType; // The type of room requested
+    private String roomId;         // Unique room ID assigned on confirmation (UC4)
 
-    /**
-     * Constructs a new Reservation for the given guest and room type.
-     *
-     * @param guest    the guest making the booking request
-     * @param roomType the type of room requested (e.g., "Single", "Double", "Suite")
-     */
+    /** Creates a pending booking request for a guest and room type. */
     public Reservation(Guest guest, String roomType) {
         this.guest = guest;
         this.roomType = roomType;
     }
 
-    /**
-     * Returns the guest associated with this reservation.
-     *
-     * @return the guest
-     */
-    public Guest getGuest() {
-        return guest;
-    }
+    public Guest getGuest()      { return guest; }
+    public String getRoomType()  { return roomType; }
+    public String getRoomId()    { return roomId; }
 
-    /**
-     * Returns the room type requested in this reservation.
-     *
-     * @return the room type string
-     */
-    public String getRoomType() {
-        return roomType;
-    }
+    /** Called after booking is confirmed to record the assigned room ID. */
+    public void setRoomId(String roomId) { this.roomId = roomId; }
 }

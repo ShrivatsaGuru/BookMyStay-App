@@ -136,6 +136,26 @@ public class InventoryService {
     }
 
     /**
+     * Restores a cancelled room back to the available inventory (UC6).
+     * Moves the room ID from bookedRoomIds back to availableRoomIds
+     * and increments the count so it can be booked again.
+     *
+     * @param roomType the category of the cancelled room
+     * @param roomId   the specific room ID being returned (e.g., "Single-1")
+     */
+    public static void restoreRoom(String roomType, String roomId) {
+        // Remove from booked set
+        bookedRoomIds.remove(roomId);
+
+        // Add back to the available set for this room type
+        availableRoomIds.putIfAbsent(roomType, new HashSet<>());
+        availableRoomIds.get(roomType).add(roomId);
+
+        // Increment the available count
+        roomCount.put(roomType, roomCount.getOrDefault(roomType, 0) + 1);
+    }
+
+    /**
      * Prints all room types that currently have at least one available room,
      * along with their count and nightly price (UC2 — guest room search).
      */
