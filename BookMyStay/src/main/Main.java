@@ -12,7 +12,7 @@ public class Main {
         boolean exit = false;
 
         while (!exit) {
-            System.out.println("Select which operation to perform :\n-1) Add Room\n-2) Get Room Count\n-3) Get Room Price\n-4) Check Rooms\n-5) Add Guest\n-6) Process Booking Request\n-7) Exit");
+            System.out.println("Select which operation to perform :\n-1) Add Room\n-2) Get Room Count\n-3) Get Room Price\n-4) Check Rooms\n-5) Add Guest\n-6) Process Booking Request\n-7) Add Service to Booking\n-8) View Service Bill\n-9) Exit");
             int operation = sc.nextInt();
             sc.nextLine();
 
@@ -66,6 +66,20 @@ public class Main {
                     System.out.println("Booking processed successfully.");
                     break;
                 case 7:
+                    // UC5: Attach an add-on service to a confirmed booking using its room ID
+                    System.out.print("Enter room ID (e.g., Single-1): ");
+                    String serviceRoomId = sc.nextLine();
+                    System.out.print("Which service to add?\n-Breakfast\n-Spa\n-Airport Pickup\n");
+                    String serviceName = sc.nextLine();
+                    admin.addService(serviceRoomId, serviceName);
+                    break;
+                case 8:
+                    // UC5: Print all add-on services and total extra charges for a booking
+                    System.out.print("Enter room ID to view bill (e.g., Single-1): ");
+                    String billRoomId = sc.nextLine();
+                    admin.printServiceBill(billRoomId);
+                    break;
+                case 9:
                     System.out.println("Exiting...");
                     exit = true;
                     break;

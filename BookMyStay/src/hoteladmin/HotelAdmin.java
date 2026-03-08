@@ -2,6 +2,8 @@ package hoteladmin;
 
 import booking.BookingService;
 import inventory.InventoryService;
+import services.Service;
+import services.ServiceManager;
 
 /**
  * Facade for all hotel administration operations.
@@ -91,5 +93,30 @@ public class HotelAdmin {
      */
     public static void processBookingRequest() {
         bookingService.processBookingRequest();
+    }
+
+    /**
+     * Adds an add-on service to a confirmed booking by room ID (UC5).
+     * Looks up the service name in the catalog and attaches it to the room.
+     *
+     * @param roomId      the room ID assigned at booking (e.g., "Single-1")
+     * @param serviceName name of the service (Breakfast / Spa / Airport Pickup)
+     */
+    public static void addService(String roomId, String serviceName) {
+        Service service = ServiceManager.getServiceFromCatalog(serviceName);
+        if (service == null) {
+            System.out.println("Unknown service: " + serviceName + ". Available: Breakfast, Spa, Airport Pickup");
+        } else {
+            ServiceManager.addService(roomId, service);
+        }
+    }
+
+    /**
+     * Prints all add-on services and the total extra charge for a booking (UC5).
+     *
+     * @param roomId the room ID assigned at booking (e.g., "Single-1")
+     */
+    public static void printServiceBill(String roomId) {
+        ServiceManager.printServiceBill(roomId);
     }
 }
