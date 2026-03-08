@@ -1,37 +1,68 @@
 package inventory;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * Manages the hotel's room inventory — counts and nightly prices per room type.
+ * Manages the hotel's room inventory — counts, prices, and room ID allocation.
  * <p>
- * Uses two static {@link HashMap}s so that inventory state is shared across
+ * Uses static data structures so that inventory state is shared across
  * all service instances:
  * <ul>
- *   <li>{@code roomCount} — maps room type to number of available rooms (UC1)</li>
- *   <li>{@code roomPrice} — maps room type to nightly price (UC1)</li>
+ *   <li>{@code roomCount} — available room count per type (UC1)</li>
+ *   <li>{@code roomPrice} — nightly price per type (UC1)</li>
+ *   <li>{@code availableRoomIds} — set of unbooked room IDs per type (UC4)</li>
+ *   <li>{@code bookedRoomIds} — all confirmed room IDs, prevents reuse (UC4)</li>
  * </ul>
- * Static helper methods support read-only lookups used by guests (UC2) and
- * availability checks during booking processing (UC3/UC4).
  * </p>
  */
 public class InventoryService {
 
-    /** Maps room type (e.g., "Single") to the number of available rooms. */
+    /** Maps room type (e.g., "Single") to the number of currently available rooms. */
     static HashMap<String, Integer> roomCount = new HashMap<>();
 
     /** Maps room type (e.g., "Single") to the nightly price. */
     static HashMap<String, Double> roomPrice = new HashMap<>();
 
     /**
-     * Adds rooms of the specified type to the inventory.
-     * If the room type already exists, the count is incremented.
+     * Maps each room type to the set of its available (unbooked) room IDs.
+     * Room IDs are generated when rooms are added (UC4).
+     */
+    static HashMap<String, Set<String>> availableRoomIds = new HashMap<>();
+
+    /**
+     * Tracks all room IDs that have been confirmed and allocated.
+     * A Set guarantees uniqueness — no room ID can be booked twice (UC4).
+     */
+    static Set<String> bookedRoomIds = new HashSet<>();
+
+    /** Per-type counter used to generate sequential, unique room IDs. */
+    static HashMap<String, Integer> roomIdCounter = new HashMap<>();
+
+    /**
+     * Adds rooms of the specified type to the inventory and generates a unique
+     * room ID for each one (e.g., "Single-1", "Single-2").
+     * <p>
+     * The counter persists across calls so IDs are always unique even if
+     * {@code addRoom} is called multiple times for the same type.
+     * </p>
      *
      * @param roomType the category of room (e.g., "Single", "Double", "Suite")
      * @param count    the number of rooms to add
      */
     public void addRoom(String roomType, int count) {
         roomCount.put(roomType, roomCount.getOrDefault(roomType, 0) + count);
+
+        // Initialise the available ID set for this type if not already present
+        availableRoomIds.putIfAbsent(roomType, new HashSet<>());
+
+        int nextId = roomIdCounter.getOrDefault(roomType, 0);
+        for (int i = 0; i < count; i++) {
+            nextId++;
+            availableRoomIds.get(roomType).add(roomType + "-" + nextId);
+        }
+        roomIdCounter.put(roomType, nextId);
     }
 
     /**
@@ -48,7 +79,7 @@ public class InventoryService {
      * Returns the nightly price for the specified room type.
      *
      * @param roomType the category of room
-     * @return the price per night, or throws {@link NullPointerException} if not set
+     * @return the price per night
      */
     public double getPrice(String roomType) {
         return roomPrice.get(roomType);
@@ -66,10 +97,6 @@ public class InventoryService {
 
     /**
      * Checks whether at least one room of the specified type is available.
-     * <p>
-     * Used by {@code BookingService} during request processing to determine
-     * if a booking can be confirmed.
-     * </p>
      *
      * @param roomType the category of room
      * @return {@code true} if count &gt; 0, {@code false} otherwise
@@ -79,20 +106,33 @@ public class InventoryService {
     }
 
     /**
-     * Decrements the available room count by one when a booking is confirmed.
+     * Assigns a unique room ID to a confirmed booking (UC4).
      * <p>
-     * Called by {@code BookingService} after a successful booking confirmation
-     * to keep inventory in sync. Ensures that once all rooms of a type are
-     * booked, subsequent requests are correctly rejected.
+     * Picks one available room ID from the type's set, moves it to
+     * {@code bookedRoomIds} (preventing reuse), and decrements the
+     * available count atomically.
      * </p>
      *
-     * @param roomType the category of room that was just booked
+     * @param roomType the category of room being booked
+     * @return the assigned room ID (e.g., "Single-2"), or {@code null} if none available
      */
-    public static void bookRoom(String roomType) {
-        int current = roomCount.getOrDefault(roomType, 0);
-        if (current > 0) {
-            roomCount.put(roomType, current - 1);
+    public static String assignRoom(String roomType) {
+        Set<String> available = availableRoomIds.getOrDefault(roomType, new HashSet<>());
+        if (available.isEmpty()) {
+            return null;
         }
+
+        // Pick the first available room ID
+        String roomId = available.iterator().next();
+
+        // Move from available → booked (Set enforces no duplicate bookings)
+        available.remove(roomId);
+        bookedRoomIds.add(roomId);
+
+        // Decrement the count to keep roomCount in sync
+        roomCount.put(roomType, roomCount.get(roomType) - 1);
+
+        return roomId;
     }
 
     /**

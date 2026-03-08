@@ -8,10 +8,11 @@ import java.util.Queue;
 /**
  * Service responsible for managing hotel booking requests using a FIFO queue.
  * <p>
- * Implements Use Case 3: Booking requests are accepted sequentially and
+ * Implements Use Case 3 &amp; 4: Booking requests are accepted sequentially and
  * processed in the order they arrive (first-come-first-served), ensuring
  * fairness during peak demand. Each request is stored as a {@link Reservation}
- * that pairs the guest with their desired room type.
+ * that pairs the guest with their desired room type. On confirmation, a unique
+ * room ID is assigned via {@link inventory.InventoryService#assignRoom} (UC4).
  * </p>
  *
  * <p>Data structure used: {@code Queue<Reservation>} backed by a {@link LinkedList},
@@ -72,8 +73,9 @@ public class BookingService {
                 Thread.currentThread().interrupt();
                 System.out.println("Booking process interrupted: " + e.getMessage());
             }
-            InventoryService.bookRoom(roomType);
-            System.out.println("Room is available. Booking confirmed for: " + guest.getName());
+            // UC4: Assign a unique room ID and mark it as booked (prevents reuse)
+            String roomId = InventoryService.assignRoom(roomType);
+            System.out.println("Booking confirmed for: " + guest.getName() + " | Assigned Room: " + roomId);
         } else {
             System.out.println("No " + roomType + " rooms available. Booking request for " + guest.getName() + " cannot be processed.");
         }
